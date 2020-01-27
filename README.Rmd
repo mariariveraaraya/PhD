@@ -1,0 +1,203 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Tables
+
+https://haozhu233.github.io/kableExtra/save_kable_and_as_image.html
+
+New Project
+time to version ontrol
+<!-- badges: start -->
+<!-- badges: end -->
+
+Radiocarbon chapter sent to Bird on January 21th - issues with converting to Word...had to use Adobe
+file is called 04-radiocarbon-LAPTOP- and it's inside writeup project/folder. To render use bookdown::render_book("writeup","bookdown::pdf_book")
+
+
+
+https://bookdown.org/yihui/bookdown/
+
+https://bookdown.org/yihui/rmarkdown/
+
+https://yihui.org/tinytex/r/#debugging
+
+https://bookdown.org/chesterismay/rbasics/
+
+https://rmarkdown.rstudio.com/articles_docx.html
+
+Another example that uses other bibliography style:
+
+
+https://ontheline.trincoll.edu/bookdown.html
+
+https://www.zevross.com/blog/2017/06/19/tips-and-tricks-for-working-with-images-and-figures-in-r-markdown-documents/
+
+to compile pdf go to output and change the options accordingly. now using https://github.com/rstudio/bookdown-demo/blob/master/_output.yml
+
+
+for ITRAX results check R version chapter 3_3 2442 san_final_model10
+
+for alll others PhD-thesis-VC preprocessing
+
+but wang could also be used: https://github.com/mariariveraaraya/thesis/blob/master/_output.yaml
+
+be sure not to include ~ or celsius symbol as it will not work. 
+
+maybe do a github page with instructions about how to do it con possible issues!
+- html vs pdf/word
+- latex
+- webpage
+- how to do it project organization, etc.
+
+python
+setosa defined in python
+
+
+in r
+ggplot(py$setosa, aes...)
+
+did not understand the "source"
+where to run computation/kubernetes
+
+reticulate::py_discover_config()
+
+###########
+to render the book in pdf use writeup project, do not how to use package "here" with this....had to change to old method
+
+PhD-thesis-VC could be used for html version
+
+issues with rendering ggplot graphs - had to be objects
+############
+To manage issues with Latex, this works: I guess R uses TeX Live
+tlmgr in command prompt: https://tex.stackexchange.com/questions/145626/what-is-the-command-prompt-how-can-i-use-it-in-texmaker-for-package-installati
+
+http://www.tug.org/texlive/tlmgr.html
+
+
+
+Experiments: raw data
+
+Preprocessing
+
+Analysis
+
+Scripts
+
+Writeup
+
+
+04-radiocarbon an_radio
+
+
+Thesis structure:
+
+1. Introduction and aims
+2. Background and methods (including modern and past climate)
+3. State of the science (review paper) 
+4. Radiocarbon: need the dates: TABLES, GRAPHS, THINK WHAT TO SAY 
+5. spicules, phytoliths grain size, hypy (Fire - vegetation), iTRAX, models
+Diatoms (Hydrology)/ITRAX/ Diatom responses to environmental changes during the Holocene (make it about the Holocene, not the actual proxy???) 
+6. discussion
+7. conclusions
+
+
+Basic statistics books
+Handbook of Biological Statistics
+John H. McDonald
+UCLA https://stats.idre.ucla.edu/other/mult-pkg/whatstat/
+https://rcompanion.org/handbook/J_01.html
+
+
+
+Maybe do everything with oxcal because can not get individual dates from bacon
+pre_diatoms line 172 final? graph needs to add concentration next to it
+pre_grain has a final graph some IDs like 197 do not add up to 100, better to include it in the sand fraction?
+
+Include phy class for modern phyt
+
+aggregate can be used the same as grou by + summarize
+
+First step:
+put results from RC in csv input to Bacon and/or Oxcal.
+Merge the Oxcal/Bacon output with the correct depths in pre_age_model and produce a final file with Identifier, Depth and Age, that will be used in the other files.
+
+
+When dates arrive have to check 38 and 51 to know what happened in that gap?
+Also - water content in ITRAX, see also elements in BUrrows K, Si, Rb
+
+diatoms - references from Negus - in ITRAX_paper_2
+
+include in past climate references to H, D-O, Younger Dryas - Bond cycles ??? from Burrows - Muller
+
+Wet Heinrich events? in Lynch burrows/muller 
+Dry Younger dryas? no evidence in Australian tropics see Tibby 20
+
+
+use reactable for tables
+count globular granulate phytoliths
+
+01.11.19
+https://rstudio.github.io/renv/
+
+For ITRAX graphs, look for chunck ITRAX2 in chapter3_3, last graph is in line 2424
+GRAPHS for hypy are in pre_hypy at the end
+GRAPHS FOR EA are in pre_EA line 168
+
+GRAPHHS ea are in 04-fire vegetation
+
+where to add core description/each chapter?
+
+corrected depths was filtered so inconsistency at depths 12.5 and 14.5 is fixed
+
+For each preprocessing file, workflow should be call this before (BUT!!! ONCE YOU HAVE CHRONOLOGY IT IS BETTER TO CREATE A FILE IN THE PRE_AGE_MODEL FILE WHICH INTEGRTES CORRECT DEPTHS AND AGES?)
+
+ages5<-read.table("C:/Users/Maria Jose Rivera/OneDrive - James Cook University/Australia renamed/Sanamere/Radiocarbon/Bacon_runs/SAN8_2019_4/SAN8_2019_4_35_ages.txt",skip=1)
+
+colnames(ages5)<-c("Depth","max","min","median","mean")
+
+correctdepths<-read.csv("C:/Users/Maria Jose Rivera/OneDrive - James Cook University/Australia renamed/Sanamere/Bulk density/replacement depths itrax_3.csv")
+
+correctdepths<-correctdepths %>% rename(Depth=Real.depth)
+
+agedepth<-merge(correctdepths,ages5,by="Depth")###FILE TO BE USED TO MERGE WITH OTHERS except itrax
+
+agedepth$Identifier<- as.numeric(as.character(agedepth$Identifier))
+
+01- Introduction and aims
+02 - Background an methods + modern and past climate 
+03- review
+04 - chronology/radiocarbon
+05- Fire veg
+06 - hydrology
+
+
+
+Please see Earo Wang github thesis !!!!!! https://github.com/mariariveraaraya/thesis
+
+https://rstudio.github.io/renv/
+
+https://bookdown.org/yihui/bookdown/latex-index.html
+
+https://github.com/rstudio/bookdown-demo
+
+This template was taken from Danielle Navarro's GitHub. In 'experiments' each technique/analysis has a 'data' folder with the raw files.
+The 'data' folder in the root should have the cleaned data which was created with the files in the 'preprocessing' folder.
+
+This is a template for a new research project. Should contains the following
+folders: [analysis](./analysis), [data](./data), [experiments](./experiments),
+[other](./other), [preprocessing](./preprocessing). Optionally, it may also 
+include a folder `models` containing modelling files, and a `writeup` folder
+containing the project writeup. 
+
+If there are other resouces (e.g., OSF folders, Overleaf documents, Google docs)
+that are linked to the project, they should be listed in this document.

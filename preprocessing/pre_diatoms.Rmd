@@ -2,7 +2,7 @@
 title: "pre_diat"
 author: "Mari Rivera"
 date: "September 23, 2019"
-output: html_document
+output: pdf_document
 editor_options: 
   chunk_output_type: console
 ---
@@ -19,22 +19,12 @@ library(tidyverse)
 library(dplyr)
 library(tidyr)
 library(analogue)
+library(plotly)
 
-#main reference: mcz064_suppl Nomenclature 2.0, Neumann et al.
-##Should include depths with low counts????
-#Should reorganize to include the corrected version with concentration
-#Stratplot with corrected counts by conc is ready and also diat, phy and sp conc
-#Should group the counts by gssc/poaceae, woody (Dicotyle), 3D=blocky, mono vs dico difference?
+####Possible  Caloneis biconstrictoides (LevkovWilliams2014)
+#great http://symbiont.ansp.org/dntf/gallery.php?g=Caloneis&r=A-C
 
-morphotype<-c("Globular echinate","Elongate echinate", "Elongate sinuous", "Globular psilate", "Hair", "Tracheids", "Blocky faceted", "Blocky polyhedron","Globular decorated","Parallelepiped blocky","Cyperaceae","Elongate psilate","Elongate facetated")
-
-plant_group<-c("Woody dicotyledons (Arecaceae?)","Non_diagnostic","Non_diagnostic","Non_diagnostic", "Non_diagnostic","Non_diagnostic","Woody Dicotyledons", "Woody Dicotyledons","Woody Dicotyledons","Woody Dicotyledons","Woody Dicotyledons","Grasses and sedges","Grasses and sedges")
-
-df<-data.frame(morphotype,plant_group)
-
-df
-#next step is to count "wood" or globular granulate phytoliths
-#check thesis to see what it means to have the different types ??? of phytoliths
+source('C:/Users/Maria Jose Rivera/OneDrive - James Cook University/Australia renamed/Sanamere/Thesis sections/PhD/preprocessing/pre_age_model.R')
 
 
 diatoms_counts<-read.csv(here("experiments", "exp_diatoms","data", "Counts_diatoms_08_08_19.csv"))
@@ -44,76 +34,37 @@ diatoms_photo<-read.csv(here("experiments", "exp_diatoms","data", "Photos_silica
 ###Concentration of diatoms
 conc<-read.csv("C:/Users/Maria Jose Rivera/OneDrive - James Cook University/Australia renamed/Sanamere/Diatoms spicules/Concentration diatoms.csv")
 
-
-##include concentrations of biogenic silica. No phytoliths peaty layer? why? accumulation is different? different vegetation - groups that produce more or less phytoliths
-
-######NEED TO check, cunt and include phytoliths <20 in all samples!!! Maybe SPIC species
-
-#par(mfrow=c(1,1))
-
-
-#####92???? COrrect 93 for counts and transects
-#CHeck superficial, 2H or other, check fractions <20 um, 28 (frustulia vs Brachisyra), do maybe 30 and 55
-
-#New column putting together Genus and species
-
 diatoms_counts$Species2 <- paste(diatoms_counts$Genus,diatoms_counts$Species)
 #phy_2$final_morphotype <- paste(phy_2$Morphotype,phy_2$Morphotype_b)
 diatoms_counts$final_morphotype <- paste(diatoms_counts$Morphotype,diatoms_counts$Morphotype_b)
 
-
-#diat_sp<-diatoms_counts %>%
-       # filter(Type=='Diatom')%>% 
-            #roup_by(Species2)
-
-#photos<-anti_join(diat_sp,diatoms_photo)
-
-#str(diat_sp$Species2)
-#diat_sp$Species2<-as.factor(diat_sp$Species2)
-#str(diatoms_photo$Species2)
-#character to factor
-
-#####Correcting by volume and amount of sediment used
-
-
-#diatoms_counts2<-read.csv("C:/Users/Maria Jose Rivera/OneDrive - James Cook University/Australia renamed/Sanamere/Diatoms spicules/Counts_diatoms_08_08_19.csv")
-
-#diatoms_counts2$Species2 <- paste(diatoms_counts2$Genus,diatoms_counts2$Species)
-
-
 #Merging counts and concentration
 diat_merge<-merge(diatoms_counts,conc,by="Identifier")
-diat_merge$Species2[diat_merge$Species2 == "Caloneis 999"] <- "Caloneis"
+#diat_merge$Species2[diat_merge$Species2 == "Caloneis 999"] <- "Caloneis"
+diat_merge$Identifier[diat_merge$Identifier == 0] <- 26
 
-#diat_merge2<-diat_merge%>%
-#      select(Identifier,Type,Genus,Species2,Counts,Total_sediment_analysed_g,Number_of_transects)%>%
-#        filter(Type=='Diatom')%>% 
-#        group_by(Identifier)%>%
-#        mutate(Corrected_counts=Counts/Total_sediment_analysed_g)%>%
+diat_merge2<-diat_merge%>%
+     select(Identifier,Type,Genus,Species2,Counts,Total_sediment_analysed_g,Number_of_transects)%>%
+        filter(Type=='Diatom')%>% 
+        group_by(Identifier)%>%
+        mutate(Corrected_counts=Counts/Total_sediment_analysed_g)%>%
         #mutate(Corrected_counts2=Counts/sum(Total_sediment_analysed_g))%>%
-#        mutate(countT= sum(Corrected_counts),countT2=sum(Counts)) %>%
-#        mutate(per=paste0(round(100*Corrected_counts/countT,2)))%>%
-#        mutate(d_g_wet_sed = countT2/Total_sediment_analysed_g)%>%
+        mutate(countT= sum(Corrected_counts),countT2=sum(Counts)) %>%
+       mutate(per=paste0(round(100*Corrected_counts/countT,2)))%>%
+        mutate(d_g_wet_sed = countT2/Total_sediment_analysed_g)%>%
+        filter(Species2!="Caloneis 999")
+
+
+
+
 #        mutate(corr_trans= countT2/Number_of_transects)%>%
 #        filter(countT2 > 0)%>%
 #       mutate(per2=paste0(round(100*Counts/countT2,2)))
         
+#conc_all<-ggplot(diat_merge2,aes(x=Identifier,y=d_g_wet_sed))+geom_point()
 
+#ggplotly(conc_all)
 
-#diat_merge22<-diat_merge%>%
-        #select(Identifier,Type,Genus,Species2,Counts,Total_sediment_analysed_g,Number_of_transec#ts)%>%
- #       filter(Type=='Diatom')%>% 
-  #      group_by(Identifier)%>%
-   #      mutate(Corrected_counts=Counts/Total_sediment_analysed_g)%>%
-    #       mutate(countT= sum(Corrected_counts),countT2=sum(Counts)) %>%
-     #   mutate(per=paste0(round(100*Corrected_counts/countT,2)))%>%
-      #  mutate(d_g_wet_sed = countT2/Total_sediment_analysed_g)%>%
-       # filter(d_g_wet_sed < 300000)
-
-        
-#plot(diat_merge22$Identifier,diat_merge22$d_g_wet_sed)
-#diat_333 <- ggplot(diat_merge2, aes(x=Identifier,y=d_g_wet_sed))+geom_point() 
-#diat_333
 diat_merge3<-diat_merge%>%
         select(Identifier,Type,Genus,Species2,Counts,Total_sediment_analysed_g,Number_of_transects)%>%
         filter(Type=='Diatom')%>% 
@@ -121,23 +72,36 @@ diat_merge3<-diat_merge%>%
         mutate(countT2=sum(Counts)) %>%
         mutate(per=paste0(round(100*Counts/countT2,2)))%>%
         mutate(d_g_wet_sed = countT2/Total_sediment_analysed_g)%>%
-        filter(countT2 > 0)
+        filter(countT2 > 0)%>%
+        filter(Species2!="Caloneis 999")
 
+
+diat_merge_age<-left_join(diat_merge3,agedepth2)
+
+age<-ggplot(diat_merge_age,aes(y=median,(x=countT2/Number_of_transects)))+geom_point()  + ggtitle("")+xlab(")")+ylab("Age (cal yr BP)")+theme_bw() + theme(axis.text.x=element_text(size=12),axis.title.x=element_text(size=12,face="bold"),axis.title.y = element_text(size=12,face="bold"))
+
+ggplotly(age)
 
 diat_merge4<- diat_merge3%>%
        spread(Species2, per) 
 
+diat_merge_pr<-diat_merge3%>%
+        select(Identifier,Species2,Counts)%>%
+        filter(Identifier!=132)%>%
+       spread(Species2, Counts) %>%
+        select(-2,-3)
+        #select(Identifier,11:29)
 
-diat_merge20<-select(diat_merge4,Identifier,11:30)
+diat_merge20<-select(diat_merge4,Identifier,11:29)
 
 #diat_merge5<- aggregate(x=diat_merge4[,2:20], by=list(Identifier=diat_merge4$Identifier), min, na.rm = TRUE)
-diat_merge11<- aggregate(x=diat_merge20[,2:21], by=list(Identifier=diat_merge4$Identifier), min, na.rm = TRUE)
+diat_merge11<- aggregate(x=diat_merge20[,2:20], by=list(Identifier=diat_merge4$Identifier), min, na.rm = TRUE)
 
-diat_new<-left_join(diat_merge11,agedepth)
+diat_new<-left_join(diat_merge11,agedepth2)
 
-diat_new2<-select(diat_new,-(3:4))
+#diat_new2<-select(diat_new,-(3:4))
 
-diat_merge10<- aggregate(x=diat_new2[,2:20], by=list(median=diat_new$median), min, na.rm = TRUE)
+diat_merge10<- aggregate(x=diat_new[,2:21], by=list(median=diat_new$median), min, na.rm = TRUE)
 
 ###Need to merge with new dates and model them with 0.5 cm resolution 
 
@@ -161,20 +125,169 @@ diat_merge10[, c(1:20)] <- sapply(diat_merge10[, c(1:20)], as.numeric)
 diat_merge10[is.na(diat_merge10)] <- 0
 
 #diat_merge10<-diat_merge10[,-(1)]
-diat_merge10<-diat_merge10[,-(20)]
+diat_merge10<-diat_merge10[,-(21)]
 
       
 #BAR_merge2 <- Stratiplot(median ~ . , data= diat_merge10, type = c("h","g","l"), sort = "wa")
 
+diat_merge_16<-select(diat_merge10,-1)
 
+
+diat_merge11<-select(diat_merge_pr,2:20)
+diat_merge111<-select(diat_merge10,2:19)
+
+
+diat_merge12<-as.data.frame(diat_merge11)
+diat_merge12[is.na(diat_merge12)] <- 0
+diat_merge13<-select(diat_merge12,-1)
+
+#diat_merge12<-diat_merge11%>%
+       # group_by(Identifier)
 ####
+diat_merge14 <- scale(diat_merge13)
+diat_merge144 <- scale(diat_merge111)
+diat_merge15<- diat_merge14*diat_merge14
+        
+
+#diat_merge11<-select(diat_merge_pr,2:20)
+
+#diat_merge_pr[is.na(diat_merge_pr)] <- 0
+#diat_merge11 <- scale(diat_merge_pr)
+#diat_merge11<- diat_merge11*diat_merge11
+#diat_merge11<-as.data.frame(diat_merge11)
+#diat_merge12<-select(diat_merge11,-1)
+#diat_merge_pr<-select(diat_merge_pr,-1)
+
+#diat_merge12<-diat_merge11%>%
+ #       group_by(Identifier)
+        
+
+
+#diat_merge11<-select(diat_merge11,-1)
+?prcurve
+
+prcurve_diat<-prcurve(diat_merge111,method='ca',trace = TRUE,plotit = TRUE,vary = TRUE,penalty=1.4)
+varExpl(prcurve_diat)
+# Extract pricipal curve scores
+scrs<-scores(prcurve_diat)
+# Plot curve vs. Age
+plot(scrs~diat_merge10$median, type="l")
+
+#not sure
+fit <- fitted(prcurve_diat) ## locations on curve
+abun <- fitted(prcurve_diat, type = "smooths") ## fitted response
+
+
+
+dissim<- vegdist(diat_merge15, method="bray")
+#dissimilarity matrix computation
+
+clust <- chclust(dissim, method="coniss")
+?chclust
+# Ball and Stick
+groups<- bstick(clust,ng=5) #determine the appropriate number of significant clusters
+ngroups<- groups$nGroups[which(groups$dispersion <= groups$bstick)]
+ngroups<- ngroups[2]
+cc<- cutree(clust, k = ngroups)
+?bstick
+?strat.plot
+# STRAT plot
+par(oma=c(2,1,1,1.2))
+strat.plot(diat_merge_16, yvar=diat_merge10$median, clust=clust, y.rev=TRUE, cex.axis=0.6, cex.yaxis=0.8, cex.ylabel=0.8, cex.lab=0.6, ylab="cal BP (yr)", col.line="black", col.bar="black", las=3, mgp=c(3,1,0))
+# check that strat plot is ok
+#?par
+x<-strat.plot(diat_merge_16, yvar=diat_merge10$median, clust=clust, y.rev=TRUE, cex.axis=0.6, cex.yaxis=0.8, cex.ylabel=0.8, cex.lab=0.6, ylab="cal BP (yr)",col.line="black", col.bar="black", las=3, mgp=c(3,1,0))
+
+z<-as.matrix(1:ngroups)
+
+addClustZone(x, clust, nZone=ngroups, col=rainbow(length(z))[rank(z)])
+c <- cutree(clust, k=ngroups)
+data$clust <- c
+  
+title(main=strat_title, cex.main=2)
+?addClustZone
+
+?gam
+pca_diat <- prcomp(diat_merge_16, center=T, scale.=T)
+
+?strat.plot
+
+pca1_diat<-as.data.frame(pca_diat$x)
+
+plot(pca1_diat$PC1~diat_merge10$median,type="l")
+
+
+#pca22<-merge(pca1,prcurve_ITRAX,by="row.names")
+
+
+library(FactoMineR)
+library(factoextra)
+
+
+?PCA
+res.pca_diat <- PCA(diat_merge_16, graph = FALSE,scale.unit = TRUE)
+dimdesc(res.pca_diat,axes=1)
+
+plot(res.pca_diat, choix = 'varcor')
+
+res.pca_diat$contrib
+
+res <- PCA(diat_merge_16, scale.unit = FALSE, graph = FALSE)
+loadings<-sweep(res$var$coord,2,sqrt(res$eig[1:5,1]),FUN="/")
+print(loadings)
+
+#Plot factormine package
+
+eig.val <- get_eigenvalue(res.pca_diat)
+eig.val
+
+fviz_eig(res.pca_diat, addlabels = TRUE, ylim = c(0, 50))
+
+#Scores with Factormine. Similar to x (in prcomp package). 
+
+res.pca_diat$ind$coord
+
+#Contributions of variables to PC1
+
+fviz_contrib(res.pca_diat, choice='var', axes=1, top=26)
+
+#Contributions of variables to PC2
+
+fviz_contrib(res.pca, choice='var', axes=2, top=26)
+
+
+
+
+#cpa_diat<-select(diat_merge10,16)
+
+#cpa<-bcp(cpa_diat)
+
+#cpaa<-sqrt(cpa_diat)
+#cpaa<-as_vector(cpaa)
+
+#library(bcp)
+#library(forecast)
+#library(quantreg)
+#library(changepoint)
+#bcp.diat<-bcp(cpaa,w0=0.2,p0=0.2,burnin=1000,mcmc=10000,return.mcmc = TRUE)
+
+#spma<-ma(cpaa,10);spor.ma<-spma[which(spma>0)]
+#depth.ma<-diat_merge10$median[which(spma>0)]
+#plot(spma)
+#plot(depth.ma,spor.ma,type="b")
+#plot(bcp.diat)
+
+
+
 
 BAR2_merge2 <- Stratiplot(median~ . , data= chooseTaxa(diat_merge10, max.abun = 5, n.occ = 1),
                    type = c("h","g"), sort = "wa",xlab="Relative percentage (%)",ylab="Age (cal yr BP)")
 
 
+BAR2_merge3 <- Stratiplot(median~ . , data= chooseTaxa(diat_merge10, max.abun = 2, n.occ = 1),
+                   type = c("h","g"), sort = "wa",xlab="Relative percentage (%)",ylab="Age (cal yr BP)")
 
-
+?Stratiplot
 #Leave surface samples out for concentration calcs
 #con_diat_2<-filter(diat_new2,Identifier >0.1)
 
@@ -186,12 +299,144 @@ BAR2_merge2 <- Stratiplot(median~ . , data= chooseTaxa(diat_merge10, max.abun = 
 #Concentration over time
 
 con_diat_1<-diat_merge3%>%
-        merge(agedepth)%>%
-        filter(Identifier >0.1)
+        merge(agedepth2)%>%
+        filter(Identifier >0.1)%>%
+        select(Depth,median,d_g_wet_sed)%>%
+        filter(median>120)
+
+con_diat_to_merge<-diat_merge3%>%
+        merge(agedepth2)%>%
+        select(Depth,median,d_g_wet_sed)%>%
+        group_by(Depth)%>%
+        unique()
 
 con_diat_2<-ggplot(con_diat_1,aes(y=median,(x=sqrt(d_g_wet_sed))))+geom_point() +  scale_y_reverse(breaks = seq(0, 32500, by = 5000)) + scale_x_continuous(limits=c(0, 600), breaks=c(0,200,400,600)) + ggtitle("")+xlab("Sqrt of Concentration (diat/g)")+ylab("Age (cal yr BP)")+theme_bw() + theme(axis.text.x=element_text(size=12),axis.title.x=element_text(size=12,face="bold"),axis.title.y = element_text(size=12,face="bold"))
 
-con_diat_2
+
+plot_conc <- con_diat_1 %>%
+        select(Depth, d_g_wet_sed) %>%
+        na.omit() %>%
+        ggplot() +
+        geom_point(aes(x = sqrt(d_g_wet_sed), y = Depth), size = 1, alpha = 0.75) + geom_path(aes(x = sqrt(d_g_wet_sed), y = Depth), size = 1, alpha = 0.75)+
+        xlab("Diatom concentration (sqrt)") +
+        theme_minimal() +
+        scale_y_reverse(breaks = seq(0, 172.2, by = 25))+
+        theme(axis.title.x=element_text(size=16),
+              axis.title.y = element_blank(),
+              axis.text.y = element_blank())
+
+plot_conc
+
+ggplotly(con_diat_2)
+
+spi_2<-diat_merge%>%
+        select(Identifier,Type,Genus,Species2,Counts,Total_sediment_analysed_g,Number_of_transects)%>%
+        filter(Type=='Spicule')%>% 
+            group_by(Identifier)%>%
+        mutate(countT2=sum(Counts)) %>%
+        mutate(per=paste0(round(100*Counts/countT2,2)))%>%
+        mutate(spi_g_wet_sed = countT2/Total_sediment_analysed_g)%>%
+        filter(countT2 > 0)
+
+spi_222<-left_join(spi_2,agedepth2)
+
+spi_333 <- ggplot(spi_222,aes(y=median,(x=sqrt(spi_g_wet_sed))))+geom_point() +  scale_y_reverse(breaks = seq(0, 33000, by = 5000))  + ggtitle("")+xlab("Sqrt of Concentration (diat/g)")+ylab("Age (cal yr BP)")+theme_bw() + theme(axis.text.x=element_text(size=12),axis.title.x=element_text(size=12,face="bold"),axis.title.y = element_text(size=12,face="bold"))
+
+spi_333
+ggplotly(spi_333)
+summary(spi_222$spi_g_wet_sed)
+
+ggplotly(d501)
+spi_diat<-merge(con_diat_to_merge,spi_222,all=TRUE)%>%
+        filter(Identifier>0.1)%>%
+        select(d_g_wet_sed,spi_g_wet_sed,median)%>%
+        drop_na()
+age_2<-ggplot(spi_diat,aes(y=median,(x=sqrt(spi_g_wet_sed)))) +geom_point()+ ggtitle("")+xlab(")")+ylab("Age (cal yr BP)")+theme_bw()
+
+age_2
+
+age_3<-ggplot(spi_diat,aes(y=median,(x=sqrt(d_g_wet_sed))))+geom_point()  + ggtitle("")+xlab(")")+ylab("Age (cal yr BP)")+theme_bw()
+
+age_3
+ggplotly(age_2)
+
+
+cor(spi_diat)
+```
+
+#main reference: mcz064_suppl Nomenclature 2.0, Neumann et al.
+##Should include depths with low counts????
+#Should reorganize to include the corrected version with concentration
+#Stratplot with corrected counts by conc is ready and also diat, phy and sp conc
+#Should group the counts by gssc/poaceae, woody (Dicotyle), 3D=blocky, mono vs dico difference?
+
+morphotype<-c("Globular echinate","Elongate echinate", "Elongate sinuous", "Globular psilate", "Hair", "Tracheids", "Blocky faceted", "Blocky polyhedron","Globular decorated","Parallelepiped blocky","Cyperaceae","Elongate psilate","Elongate facetated")
+
+plant_group<-c("Woody dicotyledons (Arecaceae?)","Non_diagnostic","Non_diagnostic","Non_diagnostic", "Non_diagnostic","Non_diagnostic","Woody Dicotyledons", "Woody Dicotyledons","Woody Dicotyledons","Woody Dicotyledons","Woody Dicotyledons","Grasses and sedges","Grasses and sedges")
+
+df<-data.frame(morphotype,plant_group)
+
+df
+#next step is to count "wood" or globular granulate phytoliths
+#check thesis to see what it means to have the different types ??? of phytoliths
+
+
+
+
+
+##include concentrations of biogenic silica. No phytoliths peaty layer? why? accumulation is different? different vegetation - groups that produce more or less phytoliths
+
+######NEED TO check, cunt and include phytoliths <20 in all samples!!! Maybe SPIC species
+
+#par(mfrow=c(1,1))
+
+
+#####92???? COrrect 93 for counts and transects
+#CHeck superficial, 2H or other, check fractions <20 um, 28 (frustulia vs Brachisyra), do maybe 30 and 55
+
+#New column putting together Genus and species
+
+
+
+
+#diat_sp<-diatoms_counts %>%
+       # filter(Type=='Diatom')%>% 
+            #roup_by(Species2)
+
+#photos<-anti_join(diat_sp,diatoms_photo)
+
+#str(diat_sp$Species2)
+#diat_sp$Species2<-as.factor(diat_sp$Species2)
+#str(diatoms_photo$Species2)
+#character to factor
+
+#####Correcting by volume and amount of sediment used
+
+
+#diatoms_counts2<-read.csv("C:/Users/Maria Jose Rivera/OneDrive - James Cook University/Australia renamed/Sanamere/Diatoms spicules/Counts_diatoms_08_08_19.csv")
+
+#diatoms_counts2$Species2 <- paste(diatoms_counts2$Genus,diatoms_counts2$Species)
+
+
+
+
+
+
+#diat_merge22<-diat_merge%>%
+        #select(Identifier,Type,Genus,Species2,Counts,Total_sediment_analysed_g,Number_of_transec#ts)%>%
+ #       filter(Type=='Diatom')%>% 
+  #      group_by(Identifier)%>%
+   #      mutate(Corrected_counts=Counts/Total_sediment_analysed_g)%>%
+    #       mutate(countT= sum(Corrected_counts),countT2=sum(Counts)) %>%
+     #   mutate(per=paste0(round(100*Corrected_counts/countT,2)))%>%
+      #  mutate(d_g_wet_sed = countT2/Total_sediment_analysed_g)%>%
+       # filter(d_g_wet_sed < 300000)
+
+        
+#plot(diat_merge22$Identifier,diat_merge22$d_g_wet_sed)
+#diat_333 <- ggplot(diat_merge2, aes(x=Identifier,y=d_g_wet_sed))+geom_point() 
+#diat_333
+
 
 
 #con_diat3<-ggplot(diat_new2,aes(x=diat_new2$Identifier,(y=sqrt(d_g_wet_sed))))+geom_point() + xlab("age")+ ylab("concentration")+ theme_bw()
@@ -338,10 +583,19 @@ diat_c<-diatoms_counts %>%
             group_by(Identifier)%>%
         mutate(countT= sum(Counts)) %>%#Total counts of diatoms per depth
         mutate(per=paste0(round(100*Counts/countT,2)))%>%#percentage
-        filter(countT > 30)%>%
+        filter(countT > 0)%>%
         filter(Species2 != "Caloneis 999")
         ###not sure about this
 #as.numeric(as.character(bulk3$Length.of.piece..cm.))
+
+diat_all<-diatoms_counts %>%
+        filter(Type=='Diatom')%>% 
+            group_by(Identifier)%>%
+        mutate(countT= sum(Counts)) %>%#Total counts of diatoms per depth
+        mutate(per=paste0(round(100*Counts/countT,2)))#percentage
+       # filter(countT > 30)%>%
+        #filter(Species2 != "Caloneis 999")
+
 
 ##Put it in strat plot format?
 
@@ -407,16 +661,10 @@ ages5<-read.table("C:/Users/Maria Jose Rivera/OneDrive - James Cook University/A
 
 colnames(ages5)<-c("Depth","max","min","median","mean")
 
-correctdepths<-read.csv("C:/Users/Maria Jose Rivera/OneDrive - James Cook University/Australia renamed/Sanamere/Bulk density/replacement depths itrax_3.csv")
-
-correctdepths<-correctdepths %>% rename(Depth=Real.depth)
-
-agedepth<-merge(correctdepths,ages5,by="Depth")###FILE TO BE USED TO MERGE WITH OTHERS except itrax
-
-agedepth$Identifier<- as.numeric(as.character(agedepth$Identifier))
 
 
-diat_ages<-left_join(diat_c2,agedepth)
+
+diat_ages<-left_join(diat_c2,agedepth2)
 diat_ages2<-select(diat_ages,-Identifier,-mean,-max,-min,-Depth)
 diat_ages3<-filter(diat_ages2,median!="NA"& median<10000)
 #diat_ages3<-filter(diat_ages2,median!="NA")
@@ -427,7 +675,17 @@ diat_ages5<-select(diat_ages4,-Identifier)
 BAR_age <- Stratiplot(median ~ . , data= chooseTaxa(diat_ages5, max.abun = 5, n.occ = 1), xlab="Relative percentage (%)",
                    type = c("h","g"), sort = "var",na.rm = TRUE,ylab="Age (cal yr BP)")
 
-?Stratiplot
+
+diat_ages33<-filter(diat_ages2,median!="NA")
+#diat_ages3<-filter(diat_ages2,median!="NA")
+diat_ages44<-ungroup(diat_ages33)
+diat_ages55<-select(diat_ages44,-Identifier)
+
+BAR_age2 <- Stratiplot(median ~ . , data= chooseTaxa(diat_ages55, max.abun = 5, n.occ = 1), xlab="Relative percentage (%)",
+                   type = c("h","g"), sort = "var",na.rm = TRUE,ylab="Age (cal yr BP)")
+
+
+
 ############NOT SURE!
 
 
@@ -515,12 +773,13 @@ conc3<-left_join(conc2,conc)%>%
         mutate(diatpg=countss/Total_sediment_analysed_g)
 
 conc4<-filter(conc3,Identifier>0.1)
-conc5<-left_join(conc4,agedepth)
+conc5<-left_join(conc4,agedepth_final)
 
 con_diat<-ggplot(conc5,aes(x=conc5$median,y=diatpg))+geom_point() + xlab("age")+ ylab("concentration")+ theme_bw()
 
 print(con_diat)
 
+str(agedepth_final$Identifier)
 
 #######
 spic_c<-diatoms_counts %>%

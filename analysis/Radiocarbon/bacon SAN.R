@@ -3,14 +3,36 @@ library(ggplot2)
 library(dplyr)
 library(rbacon)
 library(readxl)
+library(here)
 
 ##Oxcal better for individual samples, maybe all with Oxcal????
 ###Bacon with hypy dates (March 2019)
 #setwd("C:/Users/Maria Jose Rivera/OneDrive - James Cook University/Australia renamed/Sanamere/Radiocarbon")
-Bacon(core="SAN8_2019_2",d.min=40)
+
+setwd(here("experiments", "exp_radiocarbon","data"))
 
 
-setwd("C:/Users/Maria Jose Rivera/OneDrive - James Cook University/Australia renamed/Sanamere/Radiocarbon")
+#age_model_Jan20<-read.csv(here("experiments", "exp_radiocarbon","data", "EA.180614.csv"),na.strings=c("NA","#DIV/0!",""))
+
+
+
+
+
+#All hypy dates 
+Bacon(core="SAN8_2019_7",cc=3)
+
+
+
+#Hypy dates plus some other organics
+Bacon(core="SAN8_2019_8",cc=3)
+
+#all dates
+Bacon(core="SAN8_2019_9",cc=3)
+
+#hypy with hiatus
+Bacon(core="SAN8_2019_7",cc=3, hiatus.depths=c(43,67))
+
+#Bacon(core="SAN8_2019_7",cc=3, boundary.depths=c(43,67))
 
 Bacon("SAN8_2019_2", cc=3)
 
@@ -18,7 +40,50 @@ Bacon("SAN8_2019_2",cc=3,depths.file=TRUE)
 
 Bacon("SAN8_2019_3", cc=3)
 
-setwd("C:/Users/Maria Jose Rivera/OneDrive - James Cook University/Australia renamed/Sanamere/Radiocarbon")
+
+### 2 charcoal and 1 bulk organics dates already not included here!
+
+chronos<-read.csv('C:/Users/Maria Jose Rivera/OneDrive - James Cook University/Australia renamed/Sanamere/Thesis sections/PhD/experiments/exp_radiocarbon/data/Bacon_runs/SAN8_2019_8/SAN8_2019_8.csv')
+
+
+#Taking out first SPAC date
+chronos2<-filter(chronos, labID!="OZX767", labID!="OZX768", labID!="OZX769", labID!="OZY132",labID!="OZY422", labID!="OZY419",labID!="OZY418",labID!="OZY131",labID!="OZY416")
+
+
+#Taking out 
+chronos3<-filter(chronos, labID!="OZX767", labID!="OZX768", labID!="OZX769", labID!="OZY132",labID!="OZY422", labID!="OZY419",labID!="OZY418",labID!="OZY131",labID!="OZX765")
+
+
+chronos4<-filter(chronos, labID!="OZX767", labID!="OZX768", labID!="OZX769", labID!="OZY132",labID!="OZY422", labID!="OZY419",labID!="OZY418",labID!="OZY131",labID!="OZX765",labID!="OZX766")
+
+write.csv(chronos4,file='C:/Users/Maria Jose Rivera/OneDrive - James Cook University/Australia renamed/Sanamere/Thesis sections/PhD/experiments/exp_radiocarbon/data/Bacon_runs/SAN8_2019_10/SAN8_2019_10.csv',row.names = FALSE)
+
+chronos5<-chronos4%>%
+        select(1)%>%
+        rename("Laboratory Code"="labID")%>%
+       left_join(all_first_table2,by="Laboratory Code")
+
+
+Bacon("SAN8_2019_10",cc=3,depths.file=TRUE)
+
+Bacon("SAN8_2019_10",cc=3,depths.file=TRUE)
+
+
+#colnames(dates_table)[colnames(dates_table)=="OZCode"] <- "labID"
+
+#agedepth(yr.res=50, d.res=50, d.by=10)
+
+#Bacon(ask=FALSE, coredir=tempfile())
+#agedepth()
+
+
+#accrate.depth(55,set = get("info"))
+
+#accrate.age.ghost(set = get("info"))
+
+#chronos4_merge<-left_join(chronos4,dates_table,by="labID")
+
+#setwd("C:/Users/Maria Jose Rivera/OneDrive - James Cook University/Australia renamed/Sanamere/Radiocarbon")
 
 ###New model was done on Oct 23th 2019
 

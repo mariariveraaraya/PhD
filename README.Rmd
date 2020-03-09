@@ -10,6 +10,14 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
+To include:
+
+
+stripping event to justify absence of upper sediment (cyclone) and thin watery sequence
+
+chapter3_3.Rmd 2436 ITRAX graphs in row
+extra_graphs with graphs error bar and ea with depth
+fix pre_hypy
 
 Tables
 

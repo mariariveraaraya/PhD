@@ -1,7 +1,11 @@
 
 library(tidyverse)
-
+library(xlsx)
+library(readxl)
 #Hypy section
+source('C:/Users/Maria Jose Rivera/OneDrive - James Cook University/Australia renamed/Sanamere/Thesis sections/PhD/preprocessing/pre_age_model.R')
+source('C:/Users/Maria Jose Rivera/OneDrive - James Cook University/Australia renamed/Sanamere/Thesis sections/PhD/preprocessing/pre_MAR.R')
+
 
 #replacement_depths_itrax_2<-read.csv("C:/Users/Maria Jose Rivera/OneDrive - James Cook University/Australia renamed/Sanamere/Bulk density/replacement depths itrax_2.csv")
 #In the first part of the analysis, the percentage of pyrogenic carbon in the sample is calculated.
@@ -78,9 +82,9 @@ Hypyrawcombined.1$Identifier<- as.numeric(as.character(Hypyrawcombined.1$Identif
 #prepluspost<-merge(Hypyrawcombined.1,rawsubsetted,by="Identifier")
 #prepluspost2<-merge(Hypyrawcombined.1,rawsubsetted.1,by="Identifier",all=TRUE)
 
-rawsubsetted<-read.csv(here("rawsubsetted.csv"),na.strings=c("NA","#DIV/0!",""))
+#rawsubsetted<-read.csv(here("rawsubsetted.csv"),na.strings=c("NA","#DIV/0!",""))
 
-
+rawsubsetted<-read.csv("C:/Users/Maria Jose Rivera/OneDrive - James Cook University/Australia renamed/Sanamere/Thesis Sections/PhD/rawsubsetted.csv")
 prepluspost3<-merge(Hypyrawcombined.1,rawsubsetted,by="Identifier")
 
 
@@ -133,7 +137,7 @@ raw3<-mutate(raw3,Corrected=(((BlackCarbon.Perc/av_C)/1.02)-0.004)*av_C)
 
 
 raw3$Identifier<-as.numeric(raw3$Identifier)
-agedepth$Identifier<-as.numeric(agedepth$Identifier)
+#agedepth$Identifier<-as.numeric(agedepth$Identifier)
 
 #blackcarbon<-ggplot(raw3, aes(x=Corrected,y=Identifier))+geom_point(size=2.5) + theme_bw() + theme(axis.text=element_text(size=12),
 #axis.title=element_text(size=12,face="bold"))
@@ -153,7 +157,7 @@ agedepth$Identifier<-as.numeric(agedepth$Identifier)
 #colnames(ages.april.hypy)<-c("Depth","max","min","median","mean")
 
 #merge csv with ea with txt file with ages
-merged.hypy.ages <- left_join(raw3,agedepth)
+merged.hypy.ages <- left_join(raw3,agedepth2)
 
 #colnames(merged.hypy.ages)[colnames(merged.hypy.ages)=="Real.depth"] <- "Depth"
 
@@ -386,12 +390,20 @@ graph.corrected3<-ggplot(Hypy.selected5, aes(x=median,y=med.result))+geom_point(
 plot(graph.corrected3)
 
 grid.arrange(PyCxMAR.graph, blackcarbon.age3, graph.corrected,nrow=1,ncol=3)
-grid.arrange(graph.corrected, blackcarbon.age3, ncol=2)
+hypy_graph<-grid.arrange(graph.corrected, blackcarbon.age3, ncol=2)
+
+ggplotly(PyCxMAR.graph3)
 
 
 PyCxMAR.graph3<-ggplot(Hypy.selected5,aes(x=median,y=PyCxMAR))+geom_point() + ylab(expression(atop("PyC MAR",paste(mu~g~mm^{-2}~yr^{-1}))))+ xlab("Age (yr cal BP)")+ theme_bw()+ scale_x_continuous(breaks=seq(0, 32000, by=5000)) + scale_y_continuous(breaks=seq(0,1,by=0.1))+ theme(axis.text=element_text(size=18),axis.title=element_text(size=18,face="bold"))+ annotate("text",x=16000,y=0.45,label="Fire",size=20,color="red")
 graph.corrected4<-ggplot(Hypy.selected5, aes(x=median,y=med.result))+geom_point(size=2) + ylab(expression(paste(PyC~delta^{13}, C[VPDB], "(\u2030)")))+ xlab("Age (yr cal BP)")+ theme_bw()+ scale_x_continuous(breaks=seq(0, 32000, by=5000)) +  scale_y_continuous(breaks=seq(-26,-22,by=1))+ theme(axis.text=element_text(size=18),axis.title=element_text(size=18,face="bold"))+ annotate("text",x=21000,y=-23,label="Vegetation",size=20,color="green4")
 
+
+mod_hypy <- gam(PyCxMAR ~ s(median,k=15), data = Hypy.selected5, method = "REML")
+
+plot(mod_hypy)
+
+ggplotly(graph.corrected3)
 PyCxMAR.graph3
 graph.corrected4
 
@@ -399,3 +411,26 @@ graph.corrected4
 
 Cvslog<-ggplot(Hypy.selected5, aes(x=log(av_C),y=log(Corrected)))+geom_point(size=2) + ylab(expression(paste("log % PyC")))+ xlab("% C")+ theme_bw() + theme(axis.text=element_text(size=18),axis.title=element_text(size=18,face="bold"))
 Cvslog
+
+PyCxMAR.graph3<-ggplot(Hypy.selected5,aes(x=Depth,y=PyCxMAR))+geom_point() + ylab(expression(atop("PyC MAR",paste(mu~g~mm^{-2}~yr^{-1}))))+ xlab("Depth (cm)")+ theme_bw()+ scale_x_continuous(breaks=seq(0, 175, by=20)) + scale_y_continuous(breaks=seq(0,1,by=0.1))+ theme(axis.text=element_text(size=18),axis.title=element_text(size=18,face="bold"))
+graph.corrected4<-ggplot(Hypy.selected5, aes(x=Depth,y=med.result))+geom_point(size=2) + ylab(expression(paste(PyC~delta^{13}, C[VPDB], "(\u2030)")))+ xlab("Depth (cm)")+ theme_bw()+ scale_x_continuous(breaks=seq(0, 175, by=20)) +  scale_y_continuous(breaks=seq(-26,-22,by=1))+ theme(axis.text=element_text(size=18),axis.title=element_text(size=18,face="bold"))
+
+PyCxMAR.graph3
+
+
+ggplotly(PyCxMAR.graph3)
+graph.corrected4
+
+plot_hypy <- Hypy.selected5 %>%
+        select(Depth, PyCxMAR) %>%
+        na.omit() %>%
+        ggplot() +
+        geom_point(aes(x = PyCxMAR, y = Depth), size = 1, alpha = 0.75) + geom_path(aes(x = PyCxMAR, y = Depth), size = 1, alpha = 0.75)+
+        xlab("PyC MAR (ug mm-2/yr)") +
+        theme_minimal() +
+        scale_y_reverse()+
+        theme(axis.title.x=element_text(size=12),
+              axis.title.y = element_blank(),
+              axis.text.y = element_blank())
+plot_hypy
+ggplotly(plot_hypy)

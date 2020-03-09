@@ -80,6 +80,20 @@ all_first_table2<-all_first_table%>%
         rename("Laboratory Code"="OZCode", "Carbon fraction"="Carbon_fraction")%>%
         filter("Conventional radiocarbon dates" != "25,450 ± 170")
         
+hydro_1<-all_first_table2%>%
+        rename("Depth (cm)"="Depth")%>%
+       # filter("Laboratory Code"!="OZX767", "Laboratory Code"!="OZX768", "Laboratory Code"!="OZX769", "Laboratory Code"!="OZY132","Laboratory Code"!="OZY422", "Laboratory Code"!="OZY419","Laboratory Code"!="OZY418","Laboratory Code"!="OZY131","Laboratory Code"!="OZX765","Laboratory Code"!="OZX766")%>%
+        filter(!grepl('OZX767', `Laboratory Code`))%>%
+        filter(!grepl('OZX768', `Laboratory Code`))%>%
+        filter(!grepl('OZX769', `Laboratory Code`))%>%
+        filter(!grepl('OZY132', `Laboratory Code`))%>%
+        filter(!grepl('OZY422', `Laboratory Code`))%>%
+        filter(!grepl('OZY419', `Laboratory Code`))%>%
+        filter(!grepl('OZY418', `Laboratory Code`))%>%
+        filter(!grepl('OZY131', `Laboratory Code`))%>%
+        filter(!grepl('OZX766', `Laboratory Code`))%>%
+        filter(!grepl('OZY423', `Laboratory Code`))%>%
+        filter(!grepl('OZY758', `Laboratory Code`))
 
 
 ## ---- tb-one
@@ -168,6 +182,11 @@ g12<-ggplot(all2,aes(x=Depth,y=to_95,ymin= to_95,ymax=from_95,colour=Carbon_frac
 
 g12+ guides(color = guide_legend(override.aes = list(size=5))) + scale_fill_manual(name="",breaks=c("size"),labels=c(" "))
 
+e3<-ggplot(all2)+ geom_errorbar(data = all2, aes(x=Depth,ymin = to_95, ymax = from_95, group=Carbon_fraction,color=Carbon_fraction),width=10,size=1)+ xlab("Depth (cm)")+ ylab("Calibrated date (BP)")+
+        scale_x_continuous(breaks=c(6,12,32,41,65,135,144,160))+scale_y_continuous(breaks=seq(0, 32000, by=5000))+theme_bw()+ scale_colour_manual(values=cbbPalette)
+
+
+e3 + guides(color = guide_legend(override.aes = list(size=5))) + scale_fill_manual(name="",breaks=c("size"),labels=c(" "))
 
 
 ## ---- tb-four
@@ -184,4 +203,19 @@ ff3%>%
 
 ##---- radiocarbon-gr1
 
-print(g12)
+print(e3)
+
+## ---- sed-rate
+source('C:/Users/Maria Jose Rivera/OneDrive - James Cook University/Australia renamed/Sanamere/Thesis sections/PhD/preprocessing/pre_MAR.R')
+print(sed_rate)
+
+
+## ---- tb-hy
+
+hydro_1%>%
+        arrange(`Depth (cm)`)%>%
+        knitr::kable("latex",booktabs = TRUE, caption = "(ref:tb-hy)", linesep = "") %>%
+        kableExtra::kable_styling(position = "center", latex_options= "scale_down")
+
+
+setwd('C:/Users/Maria Jose Rivera/OneDrive - James Cook University/Australia renamed/Sanamere/Thesis sections/PhD')

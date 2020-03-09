@@ -14,6 +14,10 @@ library(tidyverse)
 #Stratplot with corrected counts by conc is ready and also diat, phy and sp conc
 #Should group the counts by gssc/poaceae, woody (Dicotyle), 3D=blocky, mono vs dico difference?
 
+source('C:/Users/Maria Jose Rivera/OneDrive - James Cook University/Australia renamed/Sanamere/Thesis sections/PhD/preprocessing/pre_age_model.R')
+
+
+
 morphotype<-c("Globular echinate","Elongate echinate", "Elongate sinuous", "Globular psilate", "Hair", "Tracheids", "Blocky faceted", "Blocky polyhedron","Globular decorated","Parallelepiped blocky","Cyperaceae","Elongate psilate","Elongate facetated")
 
 plant_group<-c("Woody dicotyledons (Arecaceae?)","Non_diagnostic","Non_diagnostic","Non_diagnostic", "Non_diagnostic","Non_diagnostic","Woody Dicotyledons", "Woody Dicotyledons","Woody Dicotyledons","Woody Dicotyledons","Woody Dicotyledons","Grasses and sedges","Grasses and sedges")
@@ -72,19 +76,21 @@ phy_2<-diat_merge%>%
         mutate(countT2=sum(Counts)) %>%
         mutate(Corrected_counts=Counts/Total_sediment_analysed_g)%>%
         mutate(per=paste0(round(100*Counts/countT2,2)))%>%
-        mutate(phy_g_wet_sed = countT2/Total_sediment_analysed_g)%>%
-        filter(countT2 > 0)
+        mutate(phy_g_wet_sed = countT2/Total_sediment_analysed_g)
+        filter(countT2 > 50)
 
 
 phy_2$final_morphotype<- gsub("3D","blocky faceted", phy_2$final_morphotype)
 phy_2$final_morphotype<- gsub("blocky faceted","Blocky faceted", phy_2$final_morphotype)
-phy_2$final_morphotype<- gsub("cylindroid","Elongate entire cylindrical", phy21$final_morphotype)
-phy_2$final_morphotype<- gsub("999","Unidentified", phy21$final_morphotype)
+phy_2$final_morphotype<- gsub("cylindroid","Elongate entire cylindrical", phy_2$final_morphotype)
+phy_2$final_morphotype<- gsub("999","Unidentified", phy_2$final_morphotype)
+phy_2$final_morphotype<- gsub("cylindroid ","Elongate entire cylindrical", phy_2$final_morphotype)
+
 
 #silica skeleton/elongate psilate
+phy21$final_morphotype
 
-
-phy_21<-phy_2
+phy21<-phy_2
 #gssc<-c("Saddle","Bilobate","Trapezoid oblong")
 #poaceae<-c("bulliform","Cuneiform bulliform")
 #non_diag<-c("Acicular","Elongate echinate", "Elongate sinuous", "Elongate sinuate","Tracheids")
@@ -98,6 +104,10 @@ phy_21<-phy_2
 ####Transform to ICPN 2.0
 #https://academic.oup.com/aob/article/124/2/189/5537002
 
+
+phy_gssc<-filter(phy_2, final_morphotype == 'Saddle '|final_morphotype == 'Bilobate '|final_morphotype == 'Trapezoid oblong' )
+
+str(phy_2)
 
 phy21$final_morphotype<- gsub("Saddle","gssc", phy21$final_morphotype)
 phy21$final_morphotype<- gsub("Bilobate","gssc", phy21$final_morphotype)
@@ -136,25 +146,84 @@ phy21$final_morphotype<- gsub("gssc ","gssc", phy21$final_morphotype)
 phy21$final_morphotype<- gsub("poaceae ","poaceae", phy21$final_morphotype)
 phy21$final_morphotype<- gsub(" poaceae","poaceae", phy21$final_morphotype)
 
+
+phy_2$final_morphotype<-as.factor(phy_2$final_morphotype)
+
 #Graph by morphotype
-phy_222<-left_join(phy_2,agedepth)%>%
+phy21$final_morphotype <- as.factor(phy21$final_morphotype) 
+phy211<-phy21%>%
+        select(Identifier,Counts,final_morphotype,Corrected_counts, Total_sediment_analysed_g, Number_of_transects)%>%
+        group_by(Identifier,final_morphotype)%>%
+        mutate(countT= sum(Corrected_counts))%>%
+        select(Identifier,Counts,final_morphotype,countT,Total_sediment_analysed_g,Number_of_transects)
+        
+ 
+
+
+#levels(phy211$final_morphotype)
+
+phy_222<-left_join(phy211,agedepth2)%>%
         filter(final_morphotype!="non_diag")
-phy_223<-ggplot(phy_222, aes(x=phy_222$median,y=Corrected_counts, color=final_morphotype))+geom_point()+ scale_color_hue(h = c(80, 1000))
+phy_223<-ggplot(phy_222, aes(x=phy_222$median,y=countT, color=final_morphotype))+geom_point()+ scale_color_hue(h = c(80, 1000))
 
 phy_223
+
+phy_non1<-left_join(phy211,agedepth2)
+
+phy_non<-ggplot(phy_non1, aes(x=phy_non1$median,y=countT, color=final_morphotype))+geom_point()+ scale_color_hue(h = c(80, 1000))
+
+ggplotly(phy_non)
 
 library(plotly)
 
 ggplotly(phy_223)
+
+
+phy_per<-phy21%>%
+        #select(Identifier,Type,Genus,Species2,Counts,Total_sediment_analysed_g,Number_of_transects)%>%
+        group_by(Identifier)%>%
+        mutate(Corrected_counts=Counts/Total_sediment_analysed_g)%>%
+        mutate(countT= sum(Corrected_counts),countT2=sum(Counts)) %>%
+        mutate(per=as.numeric(paste0(round(100*Corrected_counts/countT,2))))%>%
+        select(Identifier,final_morphotype,per)%>%
+        group_by(Identifier,final_morphotype)%>%
+        mutate(perT= sum(per))%>%
+        select(Identifier,final_morphotype,perT)%>%
+        unique()
+        
+        
+        #select(Identifier,per,final_morphotype)
+
+
+
+#phy_per$per<-as.numeric(as.character(phy_per$per))
+       
+#phy_per<-phy_per%>%
+#        group_by(Identifier,final_morphotype)%>%
+ #       mutate(perT= sum(per))
+
+
+phy_2222<-left_join(phy_per,agedepth2)%>%
+        filter(final_morphotype!="non_diag")
+phy_2233<-ggplot(phy_2222, aes(x=phy_2222$median,y=perT, color=final_morphotype))+geom_point()+ scale_color_hue(h = c(80, 1000))
+
+phy_2233
+
+
+ggplotly(phy_2233)
+str(phy_per$final_morphotype)
 
 #str(phy_222)
 phy_222$final_morphotype<-as.factor(phy_222$final_morphotype)
 
 
 #Concentration graph
-phy_444<-ggplot(phy_222, aes(y=median,(x=sqrt(phy_g_wet_sed))))+geom_point() +  scale_y_reverse(breaks = seq(0, 32500, by = 5000))  + ggtitle("")+xlab("Sqrt of Concentration (diat/g)")+ylab("Age (cal yr BP)")+theme_bw() + theme(axis.text.x=element_text(size=12),axis.title.x=element_text(size=12,face="bold"),axis.title.y = element_text(size=12,face="bold"))
 
-phy_444
+phy_conc<-left_join(phy21,agedepth2)
+
+phy_444<-ggplot(phy_conc, aes(y=median,(x=sqrt(phy_g_wet_sed))))+geom_point() +  scale_y_reverse(breaks = seq(0, 32500, by = 5000))  + ggtitle("")+xlab("Sqrt of Concentration (diat/g)")+ylab("Age (cal yr BP)")+theme_bw() + theme(axis.text.x=element_text(size=12),axis.title.x=element_text(size=12,face="bold"),axis.title.y = element_text(size=12,face="bold"))
+
+ggplotly(phy_444)
 
 
 phy_445<-ggplot(phy_222, aes(y=Depth,(x=sqrt(phy_g_wet_sed))))+geom_point() +  scale_y_reverse(breaks = seq(0, 175, by = 10))  + ggtitle("")+xlab("Sqrt of Concentration (diat/g)")+ylab("Age (cal yr BP)")+theme_bw() + theme(axis.text.x=element_text(size=12),axis.title.x=element_text(size=12,face="bold"),axis.title.y = element_text(size=12,face="bold"))
@@ -174,10 +243,10 @@ phy_4<-diat_merge%>%
         mutate(corr_trans= countT2/Number_of_transects)%>%
         filter(countT2 > 0)
 
-phy_44<-left_join(phy_4,agedepth)
+phy_44<-left_join(phy_4,agedepth2)
 phy_443<-ggplot(phy_44, aes(x=phy_44$median,y=sqrt(glob_g_wet_sed)))+geom_point()
 
-phy_443
+ggplotly(phy_443)
 
 phy_333 <- ggplot(phy_222, aes(x=phy_222$median,y=spi_g_wet_sed))+geom_point() 
 phy_333
@@ -191,18 +260,21 @@ phy_modern<-read.csv(here("experiments", "exp_phy","data","Phytolith_modern.csv"
 phy_modern2<-phy_modern%>%
         filter(Sci_name!="")
 
+# 20 different species
 length(unique(phy_modern2$Sci_name))
 
-# 20 different species
+#no scientific name: 2 poaceae, Melaleuca, Eucalyptus y Acacia; orange creeper?
 phy_modern3<-phy_modern%>%
         filter(Sci_name=="")
-#no scientific name: 2 poaceae, Melaleuca, Eucalyptus y Acacia; orange creeper?
+
 
 phy_modern4<-phy_modern%>%
         filter(Phy_Presence==1)
+
+#length(unique(phy_modern4))
 #https://davekimble.net/rainforest/pandanus.htm
 #with phytoliths/ 2 poaceae, pandanus, palm
-print(phy_modern4$Family)
+print(unique(phy_modern4$Family))
 
 #table include Commom_name, Family, Sci_name, Phy_abundance, Modern_reference,Phy_presence
 #add morphotype from pics same morphotypes in thesis_sci

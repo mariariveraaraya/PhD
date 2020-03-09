@@ -5,7 +5,7 @@ library(dbplyr)
 library(gridExtra)
 library(knitr)
 
-#setwd("C:/Users/Maria Jose Rivera/OneDrive - James Cook University/Australia renamed/Sanamere/Thesis sections/PhD-thesis-VC")
+#setwd("C:/Users/Maria Jose Rivera/OneDrive - James Cook University/Australia renamed/Sanamere/Thesis sections/PhD")
 
 
 read_chunk(here("preprocessing","pre_EA.R"))
@@ -111,7 +111,8 @@ agedepth$Identifier<- as.numeric(as.character(agedepth$Identifier))
 #str(agedepth)
 
 mean_by_Paper2
-EA2<-left_join(mean_by_Paper2,agedepth)
+EA2<-left_join(mean_by_Paper2,agedepth)%>%
+        filter(averaged.d13C!=(-18.54))
 
 
 #EA<-left_join(mean_by_Paper2,correctdepths)
@@ -123,12 +124,12 @@ maria2
 
 maria3 <- ggplot(EA2, aes(x=averaged.d13C,y=mean))+geom_point() +  scale_y_reverse(breaks = seq(0, 32500, by = 2500)) + scale_x_continuous(limits=c(-28, -22), breaks=c(-28, -26, -24, -22)) + ggtitle("")+xlab("\u03B4^13")+ylab("Age (cal yr BP)")+theme_bw() + theme(axis.text.x=element_text(size=12),axis.title.x=element_text(size=12,face="bold"),axis.title.y = element_text(size=12,face="bold"))
 
-maria3 <- ggplot(EA2, aes(x=averaged.d13C,y=mean))+geom_point() +  scale_y_reverse(breaks = seq(0, 32500, by = 2500)) + scale_x_continuous(limits=c(-28, -22), breaks=c(-28, -26, -24, -22)) + ggtitle("")+ labs(x= expression("\u03B4"^13), y="Age")+theme_bw() + theme(axis.text.x=element_text(size=12),axis.title.x=element_text(size=12,face="bold"),axis.title.y = element_text(size=12,face="bold"))
+maria3 <- ggplot(EA2, aes(x=averaged.d13C,y=median))+geom_point() +  scale_y_reverse(breaks = seq(0, 32500, by = 2500)) + scale_x_continuous(limits=c(-29, -22), breaks=c(-28, -26, -24, -22)) + geom_path()+ggtitle("")+labs(x= expression("\u03B4"^13), y="Age")+theme_bw() + theme(axis.text.x=element_text(size=12),axis.title.x=element_text(size=12,face="bold"),axis.title.y = element_text(size=12,face="bold"))
 
 
-maria3 <- ggplot(EA2, aes(x=averaged.d13C,y=mean))+geom_point() +  scale_y_reverse(breaks = seq(0, 32500, by = 2500)) + scale_x_continuous(limits=c(-28, -22), breaks=c(-28, -26, -24, -22)) + ggtitle("")+ labs(x= expression(bold(delta^13)),y = "Age (cal yr BP)")+theme_bw() + xlab(expression(paste(delta^{13}, C[VPDB], "(\u2030)")))+ theme(axis.text.x=element_text(size=12),axis.title.x=element_text(size=12,face="bold"),axis.title.y = element_text(size=12,face="bold"))
+#maria3 <- ggplot(EA2, aes(x=averaged.d13C,y=mean))+geom_point() +  scale_y_reverse(breaks = seq(0, 32500, by = 2500)) + scale_x_continuous(limits=c(-28, -28), breaks=c(-28, -26, -24, -22)) + ggtitle("")+ labs(x= expression(bold(delta^13)),y = "Age (cal yr BP)")+theme_bw() + xlab(expression(paste(delta^{13}, C[VPDB], "(\u2030)")))+ theme(axis.text.x=element_text(size=12),axis.title.x=element_text(size=12,face="bold"),axis.title.y = element_text(size=12,face="bold"))
 
-
+ggplotly(maria3)
 #print(p10)
 
 #p1 <- ggplot(merged.ages, aes(x=d13C,y=mean))+geom_point() +  scale_y_reverse() + scale_x_continuous(limits=c(-28, -22), breaks=c(-28, -26, -24, -22)) + ggtitle("")
@@ -137,7 +138,7 @@ maria3 <- ggplot(EA2, aes(x=averaged.d13C,y=mean))+geom_point() +  scale_y_rever
 
 
 
-maria4 <- ggplot(EA2, aes(x=averaged.C,y=mean))+geom_point()+  scale_y_reverse(breaks = seq(0, 32500, by = 2500)) +scale_x_continuous(breaks = seq(0, 50, by = 10)) +xlab("% C")+ylab("Calibrated date BP")+ggtitle("")+theme_bw()+ theme(axis.title.y=element_blank(),
+maria4 <- ggplot(EA2, aes(x=averaged.C,y=median))+geom_point()+  scale_y_reverse(breaks = seq(0, 32500, by = 2500)) +scale_x_continuous(breaks = seq(0, 50, by = 10)) +xlab("% C")+ylab("Calibrated date BP")+ggtitle("")+theme_bw()+ theme(axis.title.y=element_blank(),
                                                                                                                                                                                                                                           axis.text.y=element_blank(),axis.text.x=element_text(size=12),axis.title.x=element_text(size=12,face="bold"))
 
 
@@ -152,6 +153,17 @@ maria4_depth <- ggplot(EA2, aes(x=averaged.C,y=Depth))+geom_point()+  scale_y_re
 
 maria5<-ggplot(EA2, aes(x=averaged.C.N,y=mean))+geom_point()+ scale_x_continuous(limits=c(0, 40), breaks=seq(0,40,by=10)) + ggtitle("") +xlab("C/N ratio")+ylab("cal yr BP")+theme_bw()+ scale_y_reverse(breaks = seq(0, 32500, by = 2500))+theme(axis.title.y=element_blank(),
                                                                                                                                                                                                                                                   axis.text.y=element_blank(),axis.text.x=element_text(size=12),axis.title.x=element_text(size=12,face="bold"))
+ggplotly(maria4)
+
+
+maria_N<-ggplot(EA2, aes(x=averaged.N,y=median))+geom_point()+ scale_x_continuous(limits=c(0, 2), breaks=seq(0,2,by=0.2)) + ggtitle("") +xlab("C/N ratio")+ylab("cal yr BP")+theme_bw()+ scale_y_reverse(breaks = seq(0, 32500, by = 2500))+theme(axis.title.y=element_blank(),
+                                                                                                                                                                                                                                                  axis.text.y=element_blank(),axis.text.x=element_text(size=12),axis.title.x=element_text(size=12,face="bold"))
+ggplotly(maria_N)
+
+maria_dN<-ggplot(EA2, aes(x=averaged.d15N,y=median))+geom_point()+scale_x_continuous(limits=c(-0.5, 9), breaks=seq(-0.5,9,by=2)) + ggtitle("") +xlab("C/N ratio")+ylab("cal yr BP")+theme_bw()+ scale_y_reverse(breaks = seq(0, 32500, by = 2500))+theme(axis.title.y=element_blank(),axis.text.y=element_blank(),axis.text.x=element_text(size=12),axis.title.x=element_text(size=12,face="bold"))
+ggplotly(maria_dN)
+
+
 
 ## ---- tb-one-ea
 
